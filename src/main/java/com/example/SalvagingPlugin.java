@@ -21,7 +21,7 @@ import java.util.Map;
 @PluginDescriptor(
 		name = "Salvaging Tracker",
 		description = "Tracks crewmates salvaging/sorting and idle status on your ship",
-		enabledByDefault = false
+		enabledByDefault = true
 )
 public class SalvagingPlugin extends Plugin
 {
@@ -148,7 +148,6 @@ public class SalvagingPlugin extends Plugin
 	private void markActive(NPC npc)
 	{
 		notified.put(npc.getIndex(), false);
-		System.out.println("notified = false");
 		lastActiveTick.put(npc.getIndex(), client.getTickCount());
 	}
 
@@ -203,8 +202,6 @@ public class SalvagingPlugin extends Plugin
 			{
 				int anim = p.getAnimation();
 
-			 	System.out.println("Animation: " + anim);
-
 				isPlayerSalvaging = (anim == SALVAGING_ANIMATION || anim == SALVAGING_ANIMATION_PORT);
 				isPlayerSorting = (anim == SORTING_ANIMATION);
 			}
@@ -249,7 +246,7 @@ public class SalvagingPlugin extends Plugin
 				Pair<Boolean, Boolean> activity = activityMap.getOrDefault(idx, Pair.of(false, false));
 				if (config.notifyIdle() && !notified.get(idx) && !activity.getLeft() && !activity.getRight() && now - lastActive > config.idleThresholdTicks()) {
 					notified.put(idx, true);
-					System.out.println(crewmateIdToName.get(npc.getId()) + " is idle.");
+					log.info(crewmateIdToName.get(npc.getId()) + " is idle.");
 					notifier.notify(crewmateIdToName.get(npc.getId()) + " is idle.");
 				}
 			}
