@@ -1,7 +1,7 @@
 package com.example;
 
+import net.runelite.api.NPC;
 import net.runelite.client.ui.overlay.Overlay;
-import net.runelite.client.ui.overlay.OverlayPosition;
 import net.runelite.client.ui.overlay.components.LineComponent;
 import net.runelite.client.ui.overlay.components.PanelComponent;
 import net.runelite.client.ui.overlay.components.TitleComponent;
@@ -21,13 +21,12 @@ public class SalvagingOverlay extends Overlay
     {
         this.plugin = plugin;
         this.config = config;
-        setPosition(OverlayPosition.TOP_RIGHT);
-        setBounds(new Rectangle(0,0,400,100));
     }
 
     @Override
     public Dimension render(Graphics2D graphics)
     {
+        panel.setPreferredSize(new Dimension(170, 100));
         panel.getChildren().clear();
 
         panel.getChildren().add(
@@ -37,42 +36,47 @@ public class SalvagingOverlay extends Overlay
                         .build()
         );
 
-        if (plugin.getTrackedInstances().isEmpty()) return panel.render(graphics);
+
 
         boolean isPlayerIdle = plugin.isPlayerIdle();
         boolean isPlayerSalvaging = plugin.isPlayerSalvaging();
         boolean isPlayerSorting = plugin.isPlayerSorting();
 
-        String playerStatus = isPlayerIdle ? "Idle" : "Active";
-        if (isPlayerSalvaging) playerStatus += " | Salvaging";
-        if (isPlayerSorting)   playerStatus += " | Sorting";
+        String playerStatus = isPlayerIdle ? "Idle" : "";
+        if (isPlayerSalvaging) playerStatus += "Salvaging";
+        if (isPlayerSorting)   playerStatus += "Sorting";
 
         panel.getChildren().add(
                 LineComponent.builder()
-                        .left("Status: ")
+                        .left("Status ")
                         .right(playerStatus)
                         .leftColor(isPlayerIdle ? Color.RED : Color.GREEN)
                         .rightColor(Color.WHITE)
                         .build()
         );
 
+        if (plugin.getTrackedInstances().isEmpty()) return panel.render(graphics);
+
         for (var npc : plugin.getTrackedInstances().values())
         {
-            int idx = npc.getIndex();
+            NPC n = npc.getLeft();
+            Boolean show = npc.getRight();
+            if (!show) continue;
+            int idx = n.getIndex();
             boolean idle = plugin.isNpcIdle(idx);
             var state = plugin.getActivityState(idx);
             boolean isSalvaging = state != null && state.getLeft();
             boolean isSorting = state != null && state.getRight();
 
-            String status = idle ? "Idle" : "Active";
-            if (isSalvaging) status += " | Salvaging";
-            if (isSorting)   status += " | Sorting";
+            String status = idle ? "Idle" : "";
+            if (isSalvaging) status += "Salvaging";
+            if (isSorting)   status += "Sorting";
 
 
 
             panel.getChildren().add(
                     LineComponent.builder()
-                            .left(npc.getName() + " (" + idx + ")")
+                            .left(n.getName())
                             .right(status)
                             .leftColor(idle ? Color.RED : Color.GREEN)
                             .rightColor(Color.WHITE)
